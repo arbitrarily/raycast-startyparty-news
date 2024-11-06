@@ -1,4 +1,4 @@
-# News By StartyParty Changelog
+# News By StartyParty CHANGELOG
 
 ## [Added metadata] - 2024-11-06
 
@@ -6,14 +6,15 @@
 - Added Additional trigger commands
 - Broke Commands out into separate files
 - Added metadata images to the README
-- Update Changelog and README
+- Update CHANGELOG and README
 - Added subtitle to command
+- Fix to appllication name
 
 ## [Added timestamps] - 2024-11-06
 
 - Added timestamps to the news
-- Update Changelog and README
-- Update Changelog and README
+- Update CHANGELOG and README
+- Update CHANGELOG and README
 
 ## [comments] - 2024-11-05
 
