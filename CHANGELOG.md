@@ -4,11 +4,10 @@
 
 - More metadata descriptions
 - Added Additional trigger commands
-
-## [Added metadata] - 2024-11-06
-
+- Broke Commands out into separate files
 - Added metadata images to the README
 - Update Changelog and README
+- Added subtitle to command
 
 ## [Added timestamps] - 2024-11-06
 
