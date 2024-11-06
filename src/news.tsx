@@ -16,10 +16,49 @@ interface Response {
 // Define the post type to match the expected API response structure
 interface Post {
   _id: { $oid: string };  // MongoDB ID of the post
-  description: string;    // Description of the post
   feed: string;           // Feed source for the post (e.g., website or category)
   link: string;           // URL to read the full post
   title: string;          // Title of the post
+  pub: number;            // Publication date of the post
+}
+
+// Function to format the publication date as a human-readable string
+function timeAgo(unixTimestamp: number): string | null {
+  if (!unixTimestamp || unixTimestamp < 0) return null
+
+  const now = new Date().getTime()
+  const secondsPast = (now - unixTimestamp * 1000) / 1000
+
+  if (secondsPast < 60) {
+    return 'just now'
+  }
+
+  if (secondsPast < 3600) {
+    const minutes = Math.floor(secondsPast / 60)
+    if (minutes === 1) return '1 min ago'
+    return `${minutes} mins ago`
+  }
+
+  if (secondsPast < 86400) {
+    const hours = Math.floor(secondsPast / 3600)
+    if (hours <= 1) return '1 hour ago'
+    return `${hours} hours ago`
+  }
+
+  if (secondsPast < 604800) {
+    const days = Math.floor(secondsPast / 86400)
+    if (days === 1) return 'yesterday'
+    return `${days} days ago`
+  }
+
+  if (secondsPast < 31536000) {
+    const weeks = Math.floor(secondsPast / 604800)
+    if (weeks === 1) return '1 week ago'
+    return `${weeks} weeks ago`
+  }
+
+  const years = Math.floor(secondsPast / 31536000)
+  return `${years}years ago`
 }
 
 // Utility function to "slugify" the title (convert into a URL-friendly string)
@@ -32,6 +71,11 @@ function slugify(str: string): string {
     .replace(/--+/g, '-')  // Replace multiple hyphens with a single one
     .replace(/^-+/, '')    // Remove leading hyphens
     .replace(/-+$/, '');   // Remove trailing hyphens
+}
+
+function formatDate(date: number): string {
+  const dateObj = new Date(date);
+  return dateObj.toLocaleDateString();
 }
 
 // Function to fetch data from the API
@@ -65,7 +109,7 @@ export default function Command() {
 
   // If data is still loading, render a loading message
   if (isLoading) {
-    return <List><List.Item title="🏠 Loading News from startyparty.dev..." /></List>;
+    return <List><List.Item title="Loading articles from 🏠 startyparty.dev..." /></List>;
   }
 
   // If no posts were fetched, show a message indicating no results
@@ -81,18 +125,26 @@ export default function Command() {
         <List.Item
           key={post._id.$oid}  // Unique key for each item in the list, based on the post's MongoDB ID
           title={post.title}  // Title of the post displayed in the list
-          // Optional: Display the first 50 characters of the post description as the subtitle (not used in this version)
-          // subtitle={post.description.substring(0, 50) + '...'}
+          subtitle={timeAgo(post.pub) || ``}
           accessories={[{ text: post.feed.toLocaleString() }]}  // Display the feed source as an accessory
           // Icon for the item, dynamically generated based on the feed
           icon={{
-            source: `https://startyparty.nyc3.cdn.digitaloceanspaces.com/publishers/${slugify(post.feed)}.png`,  // Dynamically generate the icon URL based on the feed
+            source: `https://startyparty.nyc3.cdn.digitaloceanspaces.com/publishers/${slugify(post.feed)}.png`,
             fallback: "icon.png",  // Fallback icon if the generated URL fails
             tooltip: post.feed.toLocaleString(),  // Tooltip shows the feed name
           }}
           actions={  // Actions that can be performed when the item is clicked
             <ActionPanel>
-              <Action.OpenInBrowser title="Read Article" url={post.link} />  // Open the article in a browser when clicked
+              <Action.OpenInBrowser title="Read Article" url={post.link} />
+              <ActionPanel.Section>
+                {post.link && (
+                  <Action.CopyToClipboard
+                    content={post.link}
+                    title="Copy Link"
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                )}
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
